@@ -1,0 +1,333 @@
+/* Apple Numbers — pixel-faithful replica */
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --nl-accent:        #1c7ce5;
+  --nl-cell-border:   #c8c8c8;
+  --nl-header-bg:     linear-gradient(180deg,#f2f2f2 0%,#e6e6e6 100%);
+  --nl-row-header-bg: linear-gradient(90deg,#f2f2f2 0%,#e8e8e8 100%);
+  --nl-sheet-bg:      #ffffff;
+  --nl-toolbar-bg:    linear-gradient(180deg,#f7f7f7 0%,#e9e9e9 100%);
+  --nl-tab-bg:        #d8d8d8;
+  --nl-tab-active:    #ffffff;
+  --nl-formula-bg:    #ffffff;
+  --nl-text:          #1a1a1a;
+  --nl-text-light:    #6b6b6b;
+  --nl-select-fill:   rgba(28,124,229,0.10);
+  --nl-select-border: #1c7ce5;
+  --nl-font:          -apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ── Outer wrapper ── */
+.neuro-link-chat { padding: 0 !important; margin: 0 !important; background: #ececec; }
+.neuro-link-chat h1 { display: none; }
+
+/* ── Numbers toolbar ── */
+.nl-toolbar {
+  background: var(--nl-toolbar-bg);
+  border-bottom: 1px solid #b0b0b0;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 0 #ffffff inset;
+}
+.nl-toolbar-btn {
+  background: linear-gradient(180deg,#fafafa 0%,#e4e4e4 100%);
+  border: 1px solid #b8b8b8;
+  border-radius: 5px;
+  padding: 3px 11px;
+  font: 500 12px/18px var(--nl-font);
+  color: var(--nl-text);
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(255,255,255,.7) inset;
+}
+.nl-toolbar-btn:hover { background: linear-gradient(180deg,#fff 0%,#d8d8d8 100%); }
+.nl-toolbar-sep { width: 1px; height: 20px; background: #c0c0c0; margin: 0 4px; }
+.nl-toolbar-label { font: 400 12px var(--nl-font); color: var(--nl-text-light); margin-left: auto; }
+
+/* ── Sheet tab bar ── */
+.nl-tabbar {
+  background: linear-gradient(180deg,#e2e2e2 0%,#d4d4d4 100%);
+  border-bottom: 1px solid #aaa;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 10px;
+  height: 26px;
+  gap: 2px;
+}
+.nl-tab {
+  background: linear-gradient(180deg,#d0d0d0 0%,#c4c4c4 100%);
+  border: 1px solid #aaa;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  padding: 3px 16px;
+  font: 500 11px var(--nl-font);
+  color: var(--nl-text-light);
+  cursor: pointer;
+}
+.nl-tab.active {
+  background: var(--nl-tab-active);
+  color: var(--nl-text);
+  border-color: #aaa;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Formula bar ── */
+.nl-formulabar {
+  background: var(--nl-formula-bg);
+  border-bottom: 1px solid #c8c8c8;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  height: 28px;
+  gap: 6px;
+}
+.nl-cell-ref {
+  width: 68px;
+  font: 400 12px/1 var(--nl-font);
+  color: var(--nl-text);
+  border-right: 1px solid #c8c8c8;
+  padding-right: 8px;
+  flex-shrink: 0;
+}
+.nl-fx-icon { color: #555; font: italic 600 13px Georgia,serif; flex-shrink: 0; }
+.nl-formulabar-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font: 400 12px var(--nl-font);
+  color: var(--nl-text);
+  background: transparent;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Spreadsheet canvas ── */
+.nl-canvas {
+  overflow: auto;
+  background: var(--nl-sheet-bg);
+  position: relative;
+}
+
+/* ── Column-header row ── */
+.nl-col-headers {
+  display: grid;
+  grid-template-columns: 46px repeat(3, 1fr);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--nl-cell-border);
+}
+.nl-corner-cell {
+  background: var(--nl-header-bg);
+  border-right: 1px solid var(--nl-cell-border);
+  height: 22px;
+}
+.nl-col-header {
+  background: var(--nl-header-bg);
+  border-right: 1px solid var(--nl-cell-border);
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 11px var(--nl-font);
+  color: #444;
+  letter-spacing: .3px;
+  user-select: none;
+}
+
+/* ── Main pane grid ── */
+.nl-numbers-grid {
+  display: grid;
+  grid-template-columns: 46px repeat(3, 1fr);
+  grid-template-rows: repeat(2, auto);
+}
+
+/* row-header column */
+.nl-row-header {
+  background: var(--nl-row-header-bg);
+  border-right: 1px solid var(--nl-cell-border);
+  border-bottom: 1px solid var(--nl-cell-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 11px var(--nl-font);
+  color: #444;
+  user-select: none;
+  min-height: 340px;
+}
+
+/* ── Individual pane (cell) ── */
+.nl-pane {
+  border-right: 1px solid var(--nl-cell-border);
+  border-bottom: 1px solid var(--nl-cell-border);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  min-height: 340px;
+  position: relative;
+  transition: box-shadow .12s;
+}
+.nl-pane:focus-within {
+  box-shadow: inset 0 0 0 2px var(--nl-select-border);
+  z-index: 5;
+}
+.nl-pane:focus-within::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--nl-select-fill);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Pane header (Numbers cell title bar) ── */
+.nl-pane-header {
+  background: linear-gradient(180deg,#fafafa 0%,#f2f2f2 100%);
+  border-bottom: 1px solid #ddd;
+  padding: 5px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+.nl-pane-header h3 {
+  margin: 0;
+  font: 600 11px var(--nl-font);
+  color: #333;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+}
+.nl-provider-select {
+  border: 1px solid #c0c0c0;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font: 400 11px var(--nl-font);
+  background: linear-gradient(180deg,#fff 0%,#f0f0f0 100%);
+  color: var(--nl-text);
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
+}
+
+/* ── Content area ── */
+.nl-pane-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.nl-pane-input {
+  width: 100%;
+  min-height: 72px;
+  max-height: 120px;
+  padding: 8px 10px;
+  border: none;
+  border-bottom: 1px solid #e8e8e8;
+  font: 400 12.5px/1.5 var(--nl-font);
+  color: var(--nl-text);
+  resize: vertical;
+  outline: none;
+  background: #fefefe;
+}
+.nl-pane-input:focus { background: #fff; border-bottom-color: var(--nl-accent); }
+.nl-pane-input::placeholder { color: #b0b0b0; }
+
+.nl-pane-output {
+  flex: 1;
+  padding: 8px 10px;
+  font: 400 12.5px/1.6 var(--nl-font);
+  color: var(--nl-text);
+  overflow-y: auto;
+  background: transparent;
+  position: relative;
+}
+.nl-pane-output .nl-output-text p { margin: 0 0 6px; }
+.nl-pane-output .nl-output-text p:last-child { margin-bottom: 0; }
+.nl-pane-output .nl-output-text pre {
+  background: #1e1e1e; color: #e8e8e8;
+  padding: 8px 10px; border-radius: 4px;
+  overflow-x: auto; font: 400 11px/1.5 'SF Mono','Menlo',monospace;
+}
+.nl-pane-output .nl-output-text code {
+  background: #f0f0f0; padding: 1px 4px;
+  border-radius: 3px; font: 400 11px 'SF Mono','Menlo',monospace;
+}
+
+/* ── Footer ── */
+.nl-pane-footer {
+  padding: 5px 9px;
+  border-top: 1px solid #e8e8e8;
+  background: linear-gradient(180deg,#f8f8f8 0%,#f0f0f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.nl-button {
+  background: linear-gradient(180deg,#2b84f0 0%,#1565cc 100%);
+  color: #fff;
+  border: 1px solid #1058b8;
+  border-radius: 5px;
+  padding: 3px 13px;
+  font: 500 12px var(--nl-font);
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(255,255,255,.25) inset;
+  transition: filter .1s;
+}
+.nl-button:hover { filter: brightness(1.08); }
+.nl-button:disabled { opacity: .45; cursor: not-allowed; }
+.nl-button.secondary {
+  background: linear-gradient(180deg,#fafafa 0%,#e4e4e4 100%);
+  color: var(--nl-text);
+  border-color: #b8b8b8;
+  box-shadow: 0 1px 0 rgba(255,255,255,.7) inset;
+}
+.nl-button.secondary:hover { filter: brightness(.97); }
+
+/* ── Status badges ── */
+.nl-status-badge {
+  display: inline-block; padding: 1px 7px;
+  border-radius: 10px; font: 500 10px var(--nl-font);
+  margin-bottom: 5px; letter-spacing: .2px;
+}
+.nl-status-badge.running  { background: #dbeafe; color: #1e40af; animation: nl-pulse 1s infinite; }
+.nl-status-badge.completed{ background: #d1fae5; color: #065f46; }
+.nl-status-badge.error    { background: #fee2e2; color: #991b1b; }
+@keyframes nl-pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+
+.nl-timing { font: 400 10px var(--nl-font); color: var(--nl-text-light); margin-right: auto; }
+
+/* ── Bottom status bar ── */
+.nl-statusbar {
+  background: linear-gradient(180deg,#e8e8e8 0%,#dcdcdc 100%);
+  border-top: 1px solid #aaa;
+  padding: 3px 12px;
+  font: 400 11px var(--nl-font);
+  color: #555;
+  display: flex;
+  gap: 20px;
+}
+
+@media (max-width: 1100px) {
+  .nl-numbers-grid { grid-template-columns: 46px repeat(2, 1fr); }
+  .nl-col-headers  { grid-template-columns: 46px repeat(2, 1fr); }
+}
+@media (max-width: 700px) {
+  .nl-numbers-grid { grid-template-columns: 46px 1fr; }
+  .nl-col-headers  { grid-template-columns: 46px 1fr; }
+}
