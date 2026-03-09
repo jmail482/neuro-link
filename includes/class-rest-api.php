@@ -108,17 +108,14 @@ class REST_API {
 
     // ── Chat ──────────────────────────────────────────────────────────────────
     public function handle_chat( \WP_REST_Request $r ): \WP_REST_Response {
-        $pid      = $r->get_param( 'provider' );
-        $model    = $r->get_param( 'model' );
-        $provider = $this->resolve_provider( $pid );
-        if ( ! $provider ) {
-            return new \WP_REST_Response( [ 'success' => false, 'error' => "Provider '$pid' not available." ], 400 );
-        }
-        $result = $provider->complete( $r->get_param( 'input' ), $model ? [ 'model' => $model ] : [] );
-        return rest_ensure_response( array_merge( $result, [
-            'provider' => $pid,
-            'model'    => $model ?: Settings::get_provider_model( $pid ),
-        ] ) );
+        $pid   = $r->get_param( 'provider' );
+        $model = $r->get_param( 'model' );
+        // Route everything to Ollama — zero budget build
+        $provider = new Provider_Ollama();
+        $use_model = $model ?: $pid;
+        if ( ! $use_model || $use_model === 'ollama' ) $use_model = Settings::get_ollama_model();
+        $result = $provider->complete( $r->get_param( 'input' ), [ 'model' => $use_model ] );
+        return rest_ensure_response( array_merge( $result, [ 'provider' => 'ollama', 'model' => $use_model ] ) );
     }
 
     public function handle_multi_chat( \WP_REST_Request $r ): \WP_REST_Response {

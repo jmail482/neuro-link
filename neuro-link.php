@@ -91,7 +91,7 @@ add_action( 'neuro_link_reliability_check', function() {
 
 // â”€â”€ Manual worker trigger (admin AJAX) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action( 'wp_ajax_neuro_link_run_worker', function() {
-    check_ajax_referer( 'nl_admin_action' );
+    check_ajax_referer( 'nl_worker_nonce', 'nonce' );
     if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Forbidden', 403 );
     NeuroLink\Worker::run_manual();
     wp_send_json_success( [ 'message' => 'Worker ran.' ] );

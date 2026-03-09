@@ -85,6 +85,10 @@ class API_Auth {
         // Standard WP session auth.
         if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) return true;
 
+        // WP nonce auth — covers browser GUI sending X-WP-Nonce header.
+        $nonce = $r->get_header( 'x-wp-nonce' ) ?: $r->get_param( '_wpnonce' ) ?: '';
+        if ( $nonce && wp_verify_nonce( $nonce, 'wp_rest' ) ) return true;
+
         // Token auth.
         $token = self::extract_token( $r );
         if ( $token && self::verify( $token ) ) return true;

@@ -9,14 +9,17 @@ defined( 'ABSPATH' ) || exit;
 $rest_url  = esc_url( rest_url( 'neuro-link/v1/chat' ) );
 $rest_multi = esc_url( rest_url( 'neuro-link/v1/multi-chat' ) );
 $nonce     = wp_create_nonce( 'wp_rest' );
+// Real Ollama models — zero budget build
 $providers = [
-    'ollama'    => 'Ollama',
-    'openai'    => 'OpenAI',
-    'anthropic' => 'Anthropic',
-    'groq'      => 'Groq',
-    'freegpt35' => 'FreeGPT',
-    'local'     => 'Local',
+    'qwen2.5:7b'       => 'Qwen 2.5 7B',
+    'phi3:mini'        => 'Phi3 Mini',
+    'gemma3:4b'        => 'Gemma3 4B',
+    'qwen3:4b'         => 'Qwen3 4B',
+    'deepseek-r1:8b'   => 'DeepSeek R1',
+    'gemma3:27b'       => 'Gemma3 27B',
 ];
+// Pass model as provider key — REST handler will use it as the model param
+$rest_url = esc_url( rest_url( 'neuro-link/v1/chat' ) );
 ?>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
